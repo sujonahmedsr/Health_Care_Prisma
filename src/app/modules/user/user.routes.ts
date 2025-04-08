@@ -3,6 +3,6 @@ import { userController } from "./user.controller";
 
 const router = Router()
 
-router.post('/user', userController.createAdmin)
+router.post('/', userController.createAdmin)
 
 export const userRouter = router
