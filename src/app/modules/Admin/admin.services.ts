@@ -1,5 +1,6 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import { searchFields } from "./admin.constant";
+import { calculatePagination, IOptions } from "../../../shared/paginationHelper";
 
 const prisma = new PrismaClient();
 
@@ -8,8 +9,8 @@ type AdminQueryParams = {
     [key: string]: string | undefined; // dynamic filtering fields
 };
 
-const getAdmin = async (params: AdminQueryParams, options: any) => {
-    const { page, limit, sortBy, sortOrder } = options
+const getAdmin = async (params: AdminQueryParams, options: IOptions) => {
+    const { limit, skip, sortBy, sortOrder } = calculatePagination(options)
     const { searchTerm, ...fieldData } = params;
     const conditions: Prisma.AdminWhereInput[] = [];
 
@@ -38,18 +39,12 @@ const getAdmin = async (params: AdminQueryParams, options: any) => {
 
     const whereInfo: Prisma.AdminWhereInput = conditions.length > 0 ? { AND: conditions } : {};
 
-    console.log(sortBy, sortOrder);
-
-    const pageNumber = Number(page) || 1;
-    const limitNumber = Number(limit) || 10;
-
-    const skip = (pageNumber - 1) * limitNumber;
 
     // 🔍 Final Prisma query
     const result = await prisma.admin.findMany({
         where: whereInfo,
-        skip: skip,
-        take: limitNumber,
+        skip,
+        take: limit,
         orderBy: sortBy && sortOrder ? {
             [sortBy]: sortOrder
         } : {
