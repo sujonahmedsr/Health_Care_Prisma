@@ -1,46 +1,51 @@
-import { Prisma, PrismaClient } from "@prisma/client"
+import { Prisma, PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
-const getAdmin = async (params: any) => {
-    const {searchTerm, ...fieldData} = params
+type AdminQueryParams = {
+  searchTerm?: string;
+  [key: string]: string | undefined; // dynamic filtering fields
+};
 
-    console.log(fieldData);
-    
+const getAdmin = async (params: AdminQueryParams) => {
+  const { searchTerm, ...fieldData } = params;
 
-    const conditions: Prisma.AdminWhereInput[] = []
-    const searchFields = ['name', 'email']
+  const conditions: Prisma.AdminWhereInput[] = [];
+  const searchFields = ['name', 'email'];
 
-    if (params.searchTerm) {
-        conditions.push({
-            OR: searchFields.map(field => ({
-                [field]: {
-                    contains: params.searchTerm,
-                    mode: "insensitive"
-                }
-            }))
-        })
-    }
+  // 🔍 Search Term condition
+  if (searchTerm) {
+    conditions.push({
+      OR: searchFields.map(field => ({
+        [field]: {
+          contains: searchTerm,
+          mode: 'insensitive'
+        }
+      }))
+    });
+  }
 
-    if(Object.keys(fieldData).length > 0){
-        conditions.push({
-            AND: Object.keys(fieldData).map(key => ({
-                [key] : {
-                    equals: fieldData[key]
-                }
-            }))
-        })
-    }
+  // 🔍 Dynamic field filter condition
+  if (Object.keys(fieldData).length > 0) {
+    conditions.push({
+      AND: Object.entries(fieldData).map(([key, value]) => ({
+        [key]: {
+          equals: value
+        }
+      }))
+    });
+  }
 
-    const whereInfo: Prisma.AdminWhereInput = { AND: conditions }
+  const whereInfo: Prisma.AdminWhereInput = conditions.length > 0 ? { AND: conditions } : {};
 
-    const result = await prisma.admin.findMany({
-        where: whereInfo
-    })
+  // 🔍 Final Prisma query
+  const result = await prisma.admin.findMany({
+    where: whereInfo
+  });
 
-    return result
-}
+  return result;
+};
 
 export const adminServices = {
-    getAdmin
-}
+  getAdmin
+};
