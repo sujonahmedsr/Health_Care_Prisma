@@ -9,7 +9,7 @@ type AdminQueryParams = {
 };
 
 const getAdmin = async (params: AdminQueryParams, options: any) => {
-    const { page, limit } = options
+    const { page, limit, sortBy, sortOrder } = options
     const { searchTerm, ...fieldData } = params;
     const conditions: Prisma.AdminWhereInput[] = [];
 
@@ -38,11 +38,23 @@ const getAdmin = async (params: AdminQueryParams, options: any) => {
 
     const whereInfo: Prisma.AdminWhereInput = conditions.length > 0 ? { AND: conditions } : {};
 
+    console.log(sortBy, sortOrder);
+
+    const pageNumber = Number(page) || 1;
+    const limitNumber = Number(limit) || 10;
+
+    const skip = (pageNumber - 1) * limitNumber;
+
     // 🔍 Final Prisma query
     const result = await prisma.admin.findMany({
         where: whereInfo,
-        skip: (Number(page) - 1) * limit,
-        take: Number(limit)
+        skip: skip,
+        take: limitNumber,
+        orderBy: sortBy && sortOrder ? {
+            [sortBy]: sortOrder
+        } : {
+            createdAt: "desc"
+        }
     });
 
     return result;
