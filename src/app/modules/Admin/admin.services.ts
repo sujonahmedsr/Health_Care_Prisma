@@ -10,7 +10,7 @@ type AdminQueryParams = {
 };
 
 const getAdmin = async (params: AdminQueryParams, options: IOptions) => {
-    const { limit, skip, sortBy, sortOrder } = calculatePagination(options)
+    const { page, limit, skip, sortBy, sortOrder } = calculatePagination(options)
     const { searchTerm, ...fieldData } = params;
     const conditions: Prisma.AdminWhereInput[] = [];
 
@@ -52,9 +52,31 @@ const getAdmin = async (params: AdminQueryParams, options: IOptions) => {
         }
     });
 
-    return result;
+    const total = await prisma.admin.count({
+        where: whereInfo
+    })
+
+    return {
+        meta: {
+            page,
+            limit,
+            total
+        },
+        data: result
+    };
 };
 
+const getSingleAdmin = async (id: string) => {
+    const result = await prisma.admin.findUnique({
+        where: {
+            id
+        }
+    })
+
+    return result
+}
+
 export const adminServices = {
-    getAdmin
+    getAdmin,
+    getSingleAdmin
 };
