@@ -37,6 +37,10 @@ const getAdmin = async (params: AdminQueryParams, options: IOptions) => {
         });
     }
 
+    conditions.push({
+        isDeleted: false
+    })
+
     const whereInfo: Prisma.AdminWhereInput = conditions.length > 0 ? { AND: conditions } : {};
 
 
@@ -69,7 +73,8 @@ const getAdmin = async (params: AdminQueryParams, options: IOptions) => {
 const getSingleAdmin = async (id: string) => {
     const result = await prisma.admin.findUnique({
         where: {
-            id
+            id,
+            isDeleted: false
         }
     })
 
@@ -79,7 +84,8 @@ const getSingleAdmin = async (id: string) => {
 const updateAdmin = async (id: string, data: Partial<Admin>) => {
     const existing = await prisma.admin.findUnique({
         where: {
-            id
+            id,
+            isDeleted: false
         }
     })
 
@@ -99,7 +105,8 @@ const updateAdmin = async (id: string, data: Partial<Admin>) => {
 const deleteFromDb = async (id: string) => {
     const existing = await prisma.admin.findUnique({
         where: {
-            id
+            id,
+            isDeleted: false
         }
     })
 
@@ -126,9 +133,45 @@ const deleteFromDb = async (id: string) => {
     return result
 }
 
+const softDeletedFromDb = async (id: string) => {
+    const existing = await prisma.admin.findUnique({
+        where: {
+            id,
+            isDeleted: false
+        }
+    })
+    if (!existing) {
+        throw new Error("Admin not found.")
+    }
+
+    const result = await prisma.$transaction(async (tx) => {
+        const adminDeletedData = await tx.admin.update({
+            where: {
+                id
+            },
+            data: {
+                isDeleted: true
+            }
+        })
+
+        const userDeleted = await tx.user.update({
+            where: {
+                email: adminDeletedData.email
+            },
+            data: {
+                status: "BLOCKED"
+            }
+        })
+        return adminDeletedData
+    })
+
+    return result
+}
+
 export const adminServices = {
     getAdmin,
     getSingleAdmin,
     updateAdmin,
-    deleteFromDb
+    deleteFromDb,
+    softDeletedFromDb
 };
