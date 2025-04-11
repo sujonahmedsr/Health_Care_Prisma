@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { adminServices } from "./admin.services";
 import pick from "../../../shared/pick";
 import { adminFilterableFields } from "./admin.constant";
+import sendResponse from "../../../utils/sendResponse";
 
 const getAllAdmin = async (req: Request, res: Response) => {
     try {
@@ -10,12 +11,13 @@ const getAllAdmin = async (req: Request, res: Response) => {
 
         const result = await adminServices.getAdmin(query, options);
 
-        res.status(200).json({
+        sendResponse(res, {
+            statusCode: 200,
             success: true,
-            message: "Admin Retrieve Successfully",
+            message: "Get all admin",
             meta: result.meta,
-            data: result.data,
-        });
+            data: result.data
+        })
     } catch (error: any) {
         res.status(500).json({
             success: false,
@@ -27,12 +29,13 @@ const getAllAdmin = async (req: Request, res: Response) => {
 
 const getSingleAdmin = async (req: Request, res: Response) => {
     try {
-        const {id} = req.params
+        const { id } = req.params
         const result = await adminServices.getSingleAdmin(id)
-        res.status(200).json({
+        sendResponse(res, {
+            statusCode: 200,
             success: true,
-            message: "Single Admin Retrieve Successfully",
-            data: result,
+            message: "Get Single admin",
+            data: result
         })
     } catch (error: any) {
         res.status(500).json({
@@ -45,13 +48,14 @@ const getSingleAdmin = async (req: Request, res: Response) => {
 
 const updateAdmin = async (req: Request, res: Response) => {
     try {
-        const {id} = req.params
+        const { id } = req.params
         const data = req.body
         const result = await adminServices.updateAdmin(id, data)
-        res.status(200).json({
+        sendResponse(res, {
+            statusCode: 200,
             success: true,
-            message: "Admin Updated Successfully",
-            data: result,
+            message: "Update admin",
+            data: result
         })
     } catch (error: any) {
         res.status(500).json({
@@ -64,12 +68,13 @@ const updateAdmin = async (req: Request, res: Response) => {
 
 const deleteData = async (req: Request, res: Response) => {
     try {
-        const {id} = req.params
+        const { id } = req.params
         const result = await adminServices.deleteFromDb(id)
-        res.status(200).json({
+        sendResponse(res, {
+            statusCode: 200,
             success: true,
-            message: "Admin deleted",
-            data: result,
+            message: "Delete admin",
+            data: result
         })
     } catch (error: any) {
         res.status(500).json({
@@ -82,12 +87,13 @@ const deleteData = async (req: Request, res: Response) => {
 
 const softDeleteData = async (req: Request, res: Response) => {
     try {
-        const {id} = req.params
+        const { id } = req.params
         const result = await adminServices.softDeletedFromDb(id)
-        res.status(200).json({
+        sendResponse(res, {
+            statusCode: 200,
             success: true,
-            message: "Admin soft deleted",
-            data: result,
+            message: "Soft Delete admin",
+            data: result
         })
     } catch (error: any) {
         res.status(500).json({
