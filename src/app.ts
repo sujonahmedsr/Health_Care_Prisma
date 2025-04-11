@@ -1,7 +1,8 @@
-import express, { Application, Request, Response } from "express"
+import express, { Application, NextFunction, Request, response, Response } from "express"
 import cors from "cors"
-import { userRouter } from "./app/modules/user/user.routes"
-import { adminRoutes } from "./app/modules/Admin/admin.routes"
+import router from "./routes"
+import statusCode from "http-status";
+
 const app: Application = express()
 
 app.use(cors())
@@ -14,7 +15,26 @@ app.get('/', (req: Request, res: Response) => {
     })
 })
 
-app.use('/api/v1/user', userRouter)
-app.use('/api/v1/admin', adminRoutes)
+app.use('/api/v1', router)
+
+app.use((error: any, req: Request, res: Response, next: NextFunction) => {
+    res.status(statusCode.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        errorMessage: error.message || "Something went wrong",
+        errorName: error.name || "Something went wrong",
+        error
+    })
+})
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+    res.status(statusCode.NOT_FOUND).json({
+        status: false,
+        message: "Api Not Found",
+        error: {
+            path: req.originalUrl,
+            message: "Your requested path is not valid."
+        }
+    })
+})
 
 export default app;
