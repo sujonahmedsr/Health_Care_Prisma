@@ -37,7 +37,7 @@ const userLogin = async (payload: {
     const refreshToken = jwt.sign(jwtPayload, "12ssd0.3",
         {
             algorithm: "HS256",
-            expiresIn: "15m"
+            expiresIn: "30d"
         })
 
     return {
