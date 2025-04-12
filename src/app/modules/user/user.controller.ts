@@ -1,22 +1,15 @@
 import { Request, Response } from "express";
 import { userService } from "./user.service";
+import catchAsync from "../../../middleWare/catchAsync";
 
-const createAdmin = async (req: Request, res: Response) => {
-    try {
-        const result = await userService.createAdmin(req.body)
-        res.status(200).json({
-            success: true,
-            message: "Admic Created Successfully",
-            data: result
-        })
-    } catch (error: any) {
-        res.status(500).json({
-            success: false,
-            message: error?.name || "Something went wrong",
-            error: error
-        })
-    }
-}
+const createAdmin = catchAsync(async (req: Request, res: Response) => {
+    const result = await userService.createAdmin(req.body)
+    res.status(200).json({
+        success: true,
+        message: "Admic Created Successfully",
+        data: result
+    })
+})
 
 export const userController = {
     createAdmin
