@@ -6,8 +6,6 @@ import sendResponse from "../../../utils/sendResponse";
 import statusCode from "http-status";
 import catchAsync from "../../../middleWare/catchAsync";
 
-
-
 const getAllAdmin: RequestHandler = catchAsync(async (req, res, next) => {
     const query = pick(req.query, adminFilterableFields) as Record<string, string>;
     const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']) as Record<string, string>;

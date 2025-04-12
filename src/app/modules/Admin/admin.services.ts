@@ -99,6 +99,7 @@ const updateAdmin = async (id: string, data: Partial<Admin>): Promise<Admin | nu
         },
         data
     })
+
     return result
 }
 
