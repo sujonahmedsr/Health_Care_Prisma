@@ -6,8 +6,8 @@ import statusCode from "http-status";
 
 const userLogin: RequestHandler = catchAsync(async (req, res) => {
     const result = await authService.userLogin(req.body)
-    const {refreshToken} = result
-    
+    const { refreshToken } = result
+
     res.cookie("refreshToken", refreshToken, {
         secure: false,
         httpOnly: true
@@ -23,6 +23,23 @@ const userLogin: RequestHandler = catchAsync(async (req, res) => {
     })
 })
 
+const refreshToken: RequestHandler = catchAsync(async (req, res) => {
+    const {refreshToken} = req.cookies
+    const result = await authService.refreshToken(refreshToken)
+
+    sendResponse(res, {
+        statusCode: statusCode.OK,
+        success: true,
+        message: "Refresh Token Generated.",
+        data: result
+        // data: {
+        //     accessToken: result.accessToken,
+        //     needPassChange: result.needPasswordChange
+        // }
+    })
+})
+
 export const authController = {
-    userLogin
+    userLogin,
+    refreshToken
 }

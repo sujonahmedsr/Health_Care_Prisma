@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client"
-import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
+import { generateToken, verifyToken } from "../../../shared/generateToken"
+import jwt, { JwtPayload } from "jsonwebtoken"
 const prisma = new PrismaClient()
 
 const userLogin = async (payload: {
@@ -29,16 +30,8 @@ const userLogin = async (payload: {
         email: userData.email,
         role: userData.role
     }
-    const accessToken = jwt.sign(jwtPayload, "12ssd0.3",
-        {
-            algorithm: "HS256",
-            expiresIn: "15m"
-        })
-    const refreshToken = jwt.sign(jwtPayload, "12ssd0.3",
-        {
-            algorithm: "HS256",
-            expiresIn: "30d"
-        })
+    const accessToken = generateToken(jwtPayload, "12ssd0.3", "5m")
+    const refreshToken = generateToken(jwtPayload, "12ssd0.5", "30d")
 
     return {
         accessToken,
@@ -47,6 +40,38 @@ const userLogin = async (payload: {
     }
 }
 
+const refreshToken = async (token: string) => {
+    let decoded;
+    try {
+        decoded = verifyToken(token, "12ssd0.5")
+    } catch (error) {
+        throw new Error("You are not authorized.")
+    }
+    
+    const userData = await prisma.user.findUnique({
+        where: {
+            email: decoded?.email
+        }
+    })
+
+    if(!userData){
+        throw new Error("User not found.")
+    }
+
+    const jwtPayload = {
+        email: userData?.email,
+        role: userData?.role
+    }
+
+    const accessToken = generateToken(jwtPayload, "12ssd0.3", "5m")
+
+    return {
+        accessToken,
+        needPasswordChange: userData.needPasswordChange
+    }
+}
+
 export const authService = {
-    userLogin
+    userLogin,
+    refreshToken
 }
