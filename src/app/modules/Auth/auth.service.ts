@@ -11,7 +11,8 @@ const userLogin = async (payload: {
     const userData = await prisma.user.findUnique(
         {
             where: {
-                email: payload.email
+                email: payload.email,
+                status: "ACTIVE"
             }
         }
     )
@@ -50,7 +51,8 @@ const refreshToken = async (token: string) => {
     
     const userData = await prisma.user.findUnique({
         where: {
-            email: decoded?.email
+            email: decoded?.email,
+            status: "ACTIVE"
         }
     })
 
