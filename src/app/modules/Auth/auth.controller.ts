@@ -1,8 +1,8 @@
 import { RequestHandler } from "express"
-import catchAsync from "../../../middleWare/catchAsync"
 import { authService } from "./auth.service"
-import sendResponse from "../../../utils/sendResponse"
 import statusCode from "http-status";
+import catchAsync from "../../middleWare/catchAsync";
+import sendResponse from "../../utils/sendResponse";
 
 const userLogin: RequestHandler = catchAsync(async (req, res) => {
     const result = await authService.userLogin(req.body)

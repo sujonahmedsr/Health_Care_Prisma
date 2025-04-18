@@ -1,9 +1,9 @@
 import { PrismaClient } from "@prisma/client"
 import bcrypt from "bcrypt"
-import { generateToken, verifyToken } from "../../../shared/generateToken"
-import config from "../../../config"
-import ApiError from "../../../error"
 import status from "http-status"
+import { generateToken, verifyToken } from "../../shared/generateToken"
+import config from "../../config"
+import ApiError from "../../error"
 const prisma = new PrismaClient()
 
 const userLogin = async (payload: {

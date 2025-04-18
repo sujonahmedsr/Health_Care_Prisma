@@ -1,6 +1,6 @@
 import { Admin, Prisma, PrismaClient } from "@prisma/client";
 import { searchFields } from "./admin.constant";
-import { calculatePagination, IOptions } from "../../../shared/paginationHelper";
+import { calculatePagination, IOptions } from "../../shared/paginationHelper";
 
 const prisma = new PrismaClient();
 

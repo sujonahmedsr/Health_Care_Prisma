@@ -1,8 +1,8 @@
 import express, { Application, NextFunction, Request, response, Response } from "express"
 import cors from "cors"
-import router from "./routes"
 import statusCode from "http-status";
 import cookieParser from "cookie-parser"
+import router from "./app/routes";
 
 const app: Application = express()
 

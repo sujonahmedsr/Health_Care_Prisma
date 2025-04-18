@@ -1,10 +1,9 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { adminController } from "./admin.controller";
-import { AnyZodObject } from "zod"
 import { adminValidationSchemas } from "./admin.ZodValidation";
-import validateRequest from "../../../middleWare/validateRequest";
-import { auth } from "../../../middleWare/Auth";
 import { userRole } from "@prisma/client";
+import { auth } from "../../middleWare/Auth";
+import validateRequest from "../../middleWare/validateRequest";
 
 const router = Router()
 
