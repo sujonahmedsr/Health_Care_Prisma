@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { userService } from "./user.service";
-import catchAsync from "../../../middleWare/catchAsync";
+import catchAsync from "../../utils/catchAsync";
 
 const createAdmin = catchAsync(async (req: Request, res: Response) => {
     const result = await userService.createAdmin(req.body)

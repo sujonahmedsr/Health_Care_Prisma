@@ -1,10 +1,10 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { adminServices } from "./admin.services";
-import pick from "../../../shared/pick";
 import { adminFilterableFields } from "./admin.constant";
-import sendResponse from "../../../utils/sendResponse";
 import statusCode from "http-status";
-import catchAsync from "../../../middleWare/catchAsync";
+import catchAsync from "../../utils/catchAsync";
+import pick from "../../shared/pick";
+import sendResponse from "../../utils/sendResponse";
 
 const getAllAdmin: RequestHandler = catchAsync(async (req, res, next) => {
     const query = pick(req.query, adminFilterableFields) as Record<string, string>;
