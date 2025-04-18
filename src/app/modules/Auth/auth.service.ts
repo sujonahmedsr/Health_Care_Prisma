@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client"
 import bcrypt from "bcrypt"
 import { generateToken, verifyToken } from "../../../shared/generateToken"
 import jwt, { JwtPayload } from "jsonwebtoken"
+import config from "../../../config"
 const prisma = new PrismaClient()
 
 const userLogin = async (payload: {
@@ -31,8 +32,8 @@ const userLogin = async (payload: {
         email: userData.email,
         role: userData.role
     }
-    const accessToken = generateToken(jwtPayload, "12ssd0.3", "5m")
-    const refreshToken = generateToken(jwtPayload, "12ssd0.5", "30d")
+    const accessToken = generateToken(jwtPayload, config.jwt_secrete as string, config.jwt_secrete_expires_in)
+    const refreshToken = generateToken(jwtPayload, config.jwt_refresh as string, config.jwt_refresh_expires_in)
 
     return {
         accessToken,
@@ -65,7 +66,7 @@ const refreshToken = async (token: string) => {
         role: userData?.role
     }
 
-    const accessToken = generateToken(jwtPayload, "12ssd0.3", "5m")
+    const accessToken = generateToken(jwtPayload, config.jwt_refresh as string, config.jwt_refresh_expires_in)
 
     return {
         accessToken,
