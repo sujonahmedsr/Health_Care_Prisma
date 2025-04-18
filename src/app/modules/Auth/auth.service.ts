@@ -19,13 +19,13 @@ const userLogin = async (payload: {
     )
 
     if (!userData) {
-        throw new Error("User not found.")
+        throw new ApiError(status.NOT_FOUND ,"User not found.")
     }
 
     const isPasswordMatched = await bcrypt.compare(payload.password, userData.password)
 
     if (!isPasswordMatched) {
-        throw new Error("Invalid password or email.")
+        throw new ApiError(status.BAD_REQUEST,"Invalid password or email.")
     }
 
     const jwtPayload = {
@@ -57,7 +57,7 @@ const refreshToken = async (token: string) => {
     })
 
     if(!userData){
-        throw new Error("User not found.")
+        throw new ApiError(status.NOT_FOUND ,"User not found.")
     }
 
     const jwtPayload = {
