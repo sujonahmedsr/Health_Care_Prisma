@@ -1,8 +1,9 @@
 import { PrismaClient } from "@prisma/client"
 import bcrypt from "bcrypt"
 import { generateToken, verifyToken } from "../../../shared/generateToken"
-import jwt, { JwtPayload } from "jsonwebtoken"
 import config from "../../../config"
+import ApiError from "../../../error"
+import status from "http-status"
 const prisma = new PrismaClient()
 
 const userLogin = async (payload: {
@@ -12,8 +13,7 @@ const userLogin = async (payload: {
     const userData = await prisma.user.findUnique(
         {
             where: {
-                email: payload.email,
-                status: "ACTIVE"
+                email: payload.email
             }
         }
     )
@@ -45,15 +45,14 @@ const userLogin = async (payload: {
 const refreshToken = async (token: string) => {
     let decoded;
     try {
-        decoded = verifyToken(token, "12ssd0.5")
+        decoded = verifyToken(token, config.jwt_refresh as string)
     } catch (error) {
-        throw new Error("You are not authorized.")
+        throw new ApiError(status.UNAUTHORIZED, "You are not authorized.")
     }
     
     const userData = await prisma.user.findUnique({
         where: {
-            email: decoded?.email,
-            status: "ACTIVE"
+            email: decoded?.email
         }
     })
 
@@ -66,7 +65,7 @@ const refreshToken = async (token: string) => {
         role: userData?.role
     }
 
-    const accessToken = generateToken(jwtPayload, config.jwt_refresh as string, config.jwt_refresh_expires_in)
+    const accessToken = generateToken(jwtPayload, config.jwt_secrete as string, config.jwt_secrete_expires_in)
 
     return {
         accessToken,
