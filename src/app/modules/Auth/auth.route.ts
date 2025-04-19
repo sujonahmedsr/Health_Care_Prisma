@@ -11,4 +11,6 @@ route.post('/resfresh-token', authController.refreshToken)
 
 route.post('/change-password', auth(userRole.ADMIN, userRole.DOCTOR, userRole.PATIENT, userRole.SUPER_ADMIN), authController.changePassword)
 
+route.post('/forgot-password', authController.forgotPassword)
+
 export const authRoute = route
