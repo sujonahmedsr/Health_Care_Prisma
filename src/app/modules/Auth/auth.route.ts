@@ -13,4 +13,9 @@ route.post('/change-password', auth(userRole.ADMIN, userRole.DOCTOR, userRole.PA
 
 route.post('/forgot-password', authController.forgotPassword)
 
+route.post(
+    '/reset-password',
+    authController.resetPassword
+)
+
 export const authRoute = route

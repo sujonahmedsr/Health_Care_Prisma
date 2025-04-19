@@ -156,9 +156,40 @@ const forgotPassword = async (payload: {
     );
 }
 
+const resetPassword = async (token: string, payload: { id: string, password: string }) => {
+    console.log({ token, payload })
+
+    const userData = await prisma.user.findUniqueOrThrow({
+        where: {
+            id: payload.id,
+            status: userStatus.ACTIVE
+        }
+    });
+
+    const isValidToken = verifyToken(token, config.reset_pass_secrete as string)
+
+    if (!isValidToken) {
+        throw new ApiError(status.FORBIDDEN, "Forbidden!")
+    }
+
+    // hash password
+    const password = await bcrypt.hash(payload.password, 12);
+
+    // update into database
+    await prisma.user.update({
+        where: {
+            id: payload.id
+        },
+        data: {
+            password
+        }
+    })
+};
+
 export const authService = {
     userLogin,
     refreshToken,
     changePassword,
-    forgotPassword
+    forgotPassword,
+    resetPassword
 }
