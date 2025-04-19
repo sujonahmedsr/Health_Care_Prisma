@@ -1,4 +1,4 @@
-import { RequestHandler } from "express"
+import { Request, RequestHandler, Response } from "express"
 import { authService } from "./auth.service"
 import statusCode from "http-status";
 import catchAsync from "../../utils/catchAsync";
@@ -32,14 +32,23 @@ const refreshToken: RequestHandler = catchAsync(async (req, res) => {
         success: true,
         message: "Refresh Token Generated.",
         data: result
-        // data: {
-        //     accessToken: result.accessToken,
-        //     needPassChange: result.needPasswordChange
-        // }
+    })
+})
+
+const changePassword = catchAsync(async (req: Request & {user?: any}, res: Response) => {
+   
+    const result = await authService.changePassword(req.user, req.body)
+
+    sendResponse(res, {
+        statusCode: statusCode.OK,
+        success: true,
+        message: "Change Password Successfully.",
+        data: result
     })
 })
 
 export const authController = {
     userLogin,
-    refreshToken
+    refreshToken,
+    changePassword
 }

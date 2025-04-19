@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client"
+import { PrismaClient, User, userStatus } from "@prisma/client"
 import bcrypt from "bcrypt"
 import status from "http-status"
 import { generateToken, verifyToken } from "../../shared/generateToken"
@@ -73,7 +73,41 @@ const refreshToken = async (token: string) => {
     }
 }
 
+const changePassword = async (user: User, payload: {
+    oldPassword: string,
+    newPassword: string
+}) => {
+    const userData = await prisma.user.findUnique({
+        where: {
+            email: user.email
+        }
+    })
+
+    if(!userData){
+        throw new ApiError(status.NOT_FOUND ,"User not found.")
+    }
+
+    const isPasswordMatched = await bcrypt.compare(payload.oldPassword, userData.password)
+
+    if(!isPasswordMatched){
+        throw new ApiError(status.NOT_FOUND ,"Password Did't Match.")
+    }
+
+    const passwordHashed = await bcrypt.hash(payload.newPassword, 12)
+
+    await prisma.user.update({
+        where: {
+            email: userData.email
+        },
+        data: {
+            password: passwordHashed,
+            needPasswordChange: false
+        }
+    })
+}
+
 export const authService = {
     userLogin,
-    refreshToken
+    refreshToken,
+    changePassword
 }

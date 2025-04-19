@@ -8,7 +8,7 @@ import statusCode from "http-status";
 const prisma = new PrismaClient
 
 export const auth = (...roles: string[]) => {
-    return async (req: Request, res: Response, next: NextFunction) => {
+    return async (req: Request & {user?: any}, res: Response, next: NextFunction) => {
         try {
             const token = req.headers.authorization
 
@@ -31,6 +31,8 @@ export const auth = (...roles: string[]) => {
             if (roles.length && !roles.includes(role)) {
                 throw new ApiError(statusCode.UNAUTHORIZED, "You are not authorizeds.")
             }
+
+            req.user = decoded
 
             next()
         } catch (error) {
