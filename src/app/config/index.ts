@@ -14,5 +14,11 @@ export default {
     reset_pass_expires_in: process.env.RESET_PASS_EXPIRE_IN,
     reset_pass_link: process.env.RESET_PASS_LINK,
     email: process.env.EMAIL,
-    app_pass: process.env.APP_PASS
+    app_pass: process.env.APP_PASS,
+
+    cloudinary: {
+        cloud_name: process.env.CLOUD_NAME,
+        api_key: process.env.API_KEY,
+        api_secret: process.env.API_SECRETE
+    }
 }
