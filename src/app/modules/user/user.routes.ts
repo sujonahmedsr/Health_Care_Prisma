@@ -7,8 +7,6 @@ import { createAdmin } from "./user.validation";
 
 const router = Router()
 
-// router.post('/create-admin', userController.createAdmin)
-
 router.post('/create-admin',
     auth(userRole.ADMIN, userRole.SUPER_ADMIN),
     upload.single("file"),

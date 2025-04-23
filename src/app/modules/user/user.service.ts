@@ -10,11 +10,19 @@ const createAdmin = async (req: any) => {
     const file = req.file
     const data = req.body
 
-    if(file){
+    if (file) {
         const imageUpload = await uploadToCloudinary(file)
+
+        if (!imageUpload?.secure_url) {
+            throw new ApiError(status.INTERNAL_SERVER_ERROR, "Image upload failed");
+        }
+
         req.body.admin.profilePhoto = imageUpload?.secure_url
     }
 
+    if (!data?.password) {
+        throw new ApiError(status.BAD_REQUEST, "Password is required");
+    }
 
     const hashedPass = await bcrypt.hash(data.password, 12)
 
@@ -30,7 +38,7 @@ const createAdmin = async (req: any) => {
                 email: data.admin.email
             }
         })
-        if(isUserExist){
+        if (isUserExist) {
             throw new ApiError(status.BAD_REQUEST, "This email already used.")
         }
         await tx.user.create({
