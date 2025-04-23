@@ -3,7 +3,7 @@ import { userController } from "./user.controller";
 import { userRole } from "@prisma/client";
 import { auth } from "../../middleWare/Auth";
 import { upload } from "../../shared/fileUpload";
-import { createAdmin, createDoctor } from "./user.validation";
+import { createAdmin, createDoctor, createPatient } from "./user.validation";
 
 const router = Router()
 
@@ -22,6 +22,15 @@ router.post('/create-doctor',
     (req: Request, res: Response, next: NextFunction) => {
         req.body = createDoctor.parse(JSON.parse(req.body.data))
         return userController.createDoctor(req, res, next)
+    }
+)
+
+router.post('/create-patient', 
+    auth(userRole.SUPER_ADMIN, userRole.ADMIN),
+    upload.single("file"),
+    (req: Request, res: Response, next: NextFunction) => {
+        req.body = createPatient.parse(JSON.parse(req.body.data))
+        return userController.createPatient(req, res, next)
     }
 )
 
