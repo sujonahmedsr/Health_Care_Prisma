@@ -58,9 +58,51 @@ const createAdmin = async (req: any) => {
 const createDoctor = async (req: any) => {
     const file = req.file
     const data = req.body
-    console.log(file, data);
+
+    if(file){
+        const imageUpload = await uploadToCloudinary(file)
+        if(!imageUpload?.secure_url){
+            throw new ApiError(status.INTERNAL_SERVER_ERROR, "Image upload failed");
+        }
+        req.body.doctor.profilePhoto = imageUpload.secure_url
+    }
+
+    if (!data?.password) {
+        throw new ApiError(status.BAD_REQUEST, "Password is required");
+    }
+
+    const hashedPass = await bcrypt.hash(data.password, 12)
+
+    const userData = {
+        email: data.doctor.email,
+        password: hashedPass,
+        role: userRole.DOCTOR
+    }
+
+    const result = await prisma.$transaction(async (tx) => {
+        const isDoctorExist = await tx.user.findUnique({
+            where: {
+                email: data.doctor.email
+            }
+        })
+        if (isDoctorExist) {
+            throw new ApiError(status.BAD_REQUEST, "This email already used.")
+        }
+        await tx.user.create({
+            data: userData
+        })
+
+        const createDoctor = await tx.doctor.create({
+            data: data.doctor
+        })
+
+        return createDoctor
+    })
+
+    return result
 }
 
 export const userService = {
-    createAdmin
+    createAdmin,
+    createDoctor
 }
