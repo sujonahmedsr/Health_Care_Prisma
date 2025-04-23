@@ -55,6 +55,12 @@ const createAdmin = async (req: any) => {
     return result
 }
 
+const createDoctor = async (req: any) => {
+    const file = req.file
+    const data = req.body
+    console.log(file, data);
+}
+
 export const userService = {
     createAdmin
 }
