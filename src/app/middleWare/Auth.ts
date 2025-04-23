@@ -20,7 +20,7 @@ export const auth = (...roles: string[]) => {
 
             const { id, email, role } = decoded;
     
-            const user = await prisma.user.findUniqueOrThrow({
+            const user = await prisma.user.findUnique({
                 where: { id, email },
             });
 
