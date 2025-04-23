@@ -7,15 +7,15 @@ import { createAdmin } from "./user.validation";
 
 const router = Router()
 
-router.post('/create-admin', userController.createAdmin)
+// router.post('/create-admin', userController.createAdmin)
 
-// router.post('/create-admin',
-//     auth(userRole.ADMIN, userRole.SUPER_ADMIN),
-//     upload.single("file"),
-//     (req: Request, res: Response, next: NextFunction) => {
-//         req.body = createAdmin.parse(req.body.data)
-//         return userController.createAdmin(req, res, next)
-//     }
-// )
+router.post('/create-admin',
+    auth(userRole.ADMIN, userRole.SUPER_ADMIN),
+    upload.single("file"),
+    (req: Request, res: Response, next: NextFunction) => {        
+        req.body = createAdmin.parse(JSON.parse(req.body.data))       
+        return userController.createAdmin(req, res, next)
+    }
+)
 
 export const userRouter = router

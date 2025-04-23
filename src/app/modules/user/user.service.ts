@@ -6,20 +6,14 @@ import status from "http-status"
 
 const prisma = new PrismaClient()
 
-const createAdmin = async (data: any) => {
-    // const file = req.file
+const createAdmin = async (req: any) => {
+    const file = req.file
+    const data = req.body
 
-    // console.log(req.body);
-
-
-    // if(file){
-    //     const imageUpload = await uploadToCloudinary(file)
-    //     req.body.data.admin.profilePhoto = imageUpload?.secure_url
-    // }
-
-
-    console.log(data, "from service");
-
+    if(file){
+        const imageUpload = await uploadToCloudinary(file)
+        req.body.admin.profilePhoto = imageUpload?.secure_url
+    }
 
 
     const hashedPass = await bcrypt.hash(data.password, 12)
