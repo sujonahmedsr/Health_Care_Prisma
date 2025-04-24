@@ -1,12 +1,13 @@
-import { PrismaClient, userRole } from "@prisma/client"
+import { Admin, Doctor, Patient, PrismaClient, userRole } from "@prisma/client"
 import * as bcrypt from "bcrypt"
 import { uploadToCloudinary } from "../../shared/fileUpload"
 import ApiError from "../../error"
 import status from "http-status"
+import { Request } from "express"
 
 const prisma = new PrismaClient()
 
-const createAdmin = async (req: any) => {
+const createAdmin = async (req: Request): Promise<Admin> => {
     const file = req.file
     const data = req.body
 
@@ -55,7 +56,7 @@ const createAdmin = async (req: any) => {
     return result
 }
 
-const createDoctor = async (req: any) => {
+const createDoctor = async (req: Request): Promise<Doctor> => {
     const file = req.file
     const data = req.body
 
@@ -102,7 +103,7 @@ const createDoctor = async (req: any) => {
     return result
 }
 
-const createPatient = async (req: any) => {
+const createPatient = async (req: Request): Promise<Patient> => {
     const file = req.file
     const data = req.body
 
