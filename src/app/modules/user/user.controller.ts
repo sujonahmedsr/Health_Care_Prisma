@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { userService } from "./user.service";
 import catchAsync from "../../utils/catchAsync";
+import pick from "../../shared/pick";
 
 const createAdmin = catchAsync(async (req: Request, res: Response) => {
     const result = await userService.createAdmin(req)
@@ -30,12 +31,14 @@ const createPatient = catchAsync(async (req: Request, res: Response) => {
 })
 
 const getAllUsers = catchAsync(async (req: Request, res: Response) => {
-    const query = req.query
-    const result = await userService.getAllUsers(query)
+    const query = pick(req.query, ["searchTerm", "email"]) as Record<string, string>;
+    const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']) as Record<string, string>;
+    const result = await userService.getAllUsers(query, options)
     res.status(200).json({
         success: true,
         message: "All User Retrive Successfully",
-        data: result
+        meta: result.meta,
+        data: result.data
     })
 })
 

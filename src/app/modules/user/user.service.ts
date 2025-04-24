@@ -5,6 +5,7 @@ import ApiError from "../../error"
 import status from "http-status"
 import { Request } from "express"
 import { object } from "zod"
+import { calculatePagination, IOptions } from "../../shared/paginationHelper"
 
 const prisma = new PrismaClient()
 
@@ -151,15 +152,16 @@ const createPatient = async (req: Request): Promise<Patient> => {
     return result
 }
 
-const getAllUsers = async (query: any) => {
-    const { search, ...field } = query
+const getAllUsers = async (query: any, options: IOptions) => {
+    const { searchTerm, ...field } = query
+    const { page, limit, skip, sortBy, sortOrder } = calculatePagination(options)
     const andConditions: Prisma.UserWhereInput[] = []
 
-    if(search){
+    if(searchTerm){
         andConditions.push({
             OR: ["email"].map(field => ({
                 [field]: {
-                    contains: search,
+                    contains: searchTerm,
                     mode: "insensitive"
                 }
             }))
@@ -179,9 +181,24 @@ const getAllUsers = async (query: any) => {
     const whereConditions: Prisma.UserWhereInput = {AND: andConditions}
 
     const result = await prisma.user.findMany({
-        where: whereConditions
+        where: whereConditions,
+        skip,
+        take: Number(limit),
+        orderBy: sortBy && sortOrder ? {
+            [sortBy]: sortOrder
+        } : {
+            createdAt: "desc"
+        }
     })
-    return result
+    const total = await prisma.user.count()
+    return {
+        meta: {
+            page,
+            limit,
+            total
+        },
+        data: result
+    };
 }
 
 export const userService = {
