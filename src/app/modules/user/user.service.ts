@@ -1,9 +1,10 @@
-import { Admin, Doctor, Patient, PrismaClient, userRole } from "@prisma/client"
+import { Admin, Doctor, Patient, Prisma, PrismaClient, userRole } from "@prisma/client"
 import * as bcrypt from "bcrypt"
 import { uploadToCloudinary } from "../../shared/fileUpload"
 import ApiError from "../../error"
 import status from "http-status"
 import { Request } from "express"
+import { object } from "zod"
 
 const prisma = new PrismaClient()
 
@@ -60,9 +61,9 @@ const createDoctor = async (req: Request): Promise<Doctor> => {
     const file = req.file
     const data = req.body
 
-    if(file){
+    if (file) {
         const imageUpload = await uploadToCloudinary(file)
-        if(!imageUpload?.secure_url){
+        if (!imageUpload?.secure_url) {
             throw new ApiError(status.INTERNAL_SERVER_ERROR, "Image upload failed");
         }
         req.body.doctor.profilePhoto = imageUpload.secure_url
@@ -107,9 +108,9 @@ const createPatient = async (req: Request): Promise<Patient> => {
     const file = req.file
     const data = req.body
 
-    if(file){
+    if (file) {
         const imageUpload = await uploadToCloudinary(file)
-        if(!imageUpload?.secure_url){
+        if (!imageUpload?.secure_url) {
             throw new ApiError(status.INTERNAL_SERVER_ERROR, "Image upload failed");
         }
         req.body.patient.profilePhoto = imageUpload.secure_url
@@ -150,8 +151,42 @@ const createPatient = async (req: Request): Promise<Patient> => {
     return result
 }
 
+const getAllUsers = async (query: any) => {
+    const { search, ...field } = query
+    const andConditions: Prisma.UserWhereInput[] = []
+
+    if(search){
+        andConditions.push({
+            OR: ["email"].map(field => ({
+                [field]: {
+                    contains: search,
+                    mode: "insensitive"
+                }
+            }))
+        })
+    }
+
+    if(Object.keys(field).length > 0){
+        andConditions.push({
+            AND: Object.keys(field).map(key => ({
+                [key]: {
+                    equals: field[key]
+                }
+            }))
+        })
+    }
+
+    const whereConditions: Prisma.UserWhereInput = {AND: andConditions}
+
+    const result = await prisma.user.findMany({
+        where: whereConditions
+    })
+    return result
+}
+
 export const userService = {
     createAdmin,
     createDoctor,
-    createPatient
+    createPatient,
+    getAllUsers
 }

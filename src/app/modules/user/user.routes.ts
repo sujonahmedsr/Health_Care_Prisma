@@ -33,4 +33,6 @@ router.post('/create-patient',
     }
 )
 
+router.get('/', userController.getAllUsers)
+
 export const userRouter = router
