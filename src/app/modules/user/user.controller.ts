@@ -55,10 +55,32 @@ const changeProfileStatus = catchAsync(async (req: Request, res: Response) => {
     })
 });
 
+const getMyProfile = catchAsync(async (req: Request & {user?: any}, res: Response) => {
+    const user = req.user
+    const result = await userService.getMyProfile(user)
+    res.status(200).json({
+        success: true,
+        message: "My profile",
+        data: result
+    })
+});
+
+const updateProfile = catchAsync(async (req: Request & {user?: any}, res: Response) => {
+    const user = req.user
+    const result = await userService.updateProfile(user, req)
+    res.status(200).json({
+        success: true,
+        message: "Update Profile",
+        data: result
+    })
+});
+
 export const userController = {
     createAdmin,
     createDoctor,
     createPatient,
     getAllUsers,
-    changeProfileStatus
+    changeProfileStatus,
+    getMyProfile,
+    updateProfile
 }

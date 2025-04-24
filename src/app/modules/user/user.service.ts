@@ -158,7 +158,7 @@ const getAllUsers = async (query: any, options: IOptions) => {
     const { page, limit, skip, sortBy, sortOrder } = calculatePagination(options)
     const andConditions: Prisma.UserWhereInput[] = []
 
-    if(searchTerm){
+    if (searchTerm) {
         andConditions.push({
             OR: userSearchAbleFields.map(field => ({
                 [field]: {
@@ -169,7 +169,7 @@ const getAllUsers = async (query: any, options: IOptions) => {
         })
     }
 
-    if(Object.keys(field).length > 0){
+    if (Object.keys(field).length > 0) {
         andConditions.push({
             AND: Object.keys(field).map(key => ({
                 [key]: {
@@ -179,7 +179,7 @@ const getAllUsers = async (query: any, options: IOptions) => {
         })
     }
 
-    const whereConditions: Prisma.UserWhereInput = {AND: andConditions}
+    const whereConditions: Prisma.UserWhereInput = { AND: andConditions }
 
     const result = await prisma.user.findMany({
         where: whereConditions,
@@ -221,7 +221,7 @@ const changeProfileStatus = async (id: string, status: userRole) => {
         }
     });
 
-    if(!userData){
+    if (!userData) {
         throw new ApiError(404, "User not found.")
     }
 
@@ -235,10 +235,117 @@ const changeProfileStatus = async (id: string, status: userRole) => {
     return updateUserStatus;
 };
 
+const getMyProfile = async (user: any) => {
+    const userData = await prisma.user.findUnique({
+        where: {
+            email: user.email
+        },
+        select: {
+            id: true,
+            email: true,
+            needPasswordChange: true,
+            role: true,
+            status: true
+        }
+    })
+
+    if (!userData) {
+        throw new ApiError(status.NOT_FOUND, "User not found.")
+    }
+
+    let profile;
+
+    if (userData.role === userRole.ADMIN || userData.role === userRole.SUPER_ADMIN) {
+        profile = await prisma.admin.findUnique({
+            where: {
+                email: userData.email
+            }
+        })
+    }
+    if (userData.role === userRole.DOCTOR) {
+        profile = await prisma.doctor.findUnique({
+            where: {
+                email: userData.email
+            }
+        })
+    }
+    if (userData.role === userRole.PATIENT) {
+        profile = await prisma.patient.findUnique({
+            where: {
+                email: userData.email
+            }
+        })
+    }
+
+    if (!profile) {
+        throw new ApiError(status.NOT_FOUND, "profile not found.")
+    }
+
+    return { ...userData, ...profile }
+}
+
+const updateProfile = async (user: any, req: Request) => {
+    const file = req.file
+    const payload = req.body
+
+    if (file) {
+        const imageUpload = await uploadToCloudinary(file)
+        if (!imageUpload?.secure_url) {
+            throw new ApiError(status.INTERNAL_SERVER_ERROR, "Image upload failed");
+        }
+        req.body.profilePhoto = imageUpload.secure_url
+    }
+
+    const userData = await prisma.user.findUnique({
+        where: {
+            email: user.email
+        }
+    })
+
+    if (!userData) {
+        throw new ApiError(status.NOT_FOUND, "User not found.")
+    }
+
+    let profile;
+
+    if (userData.role === userRole.ADMIN || userData.role === userRole.SUPER_ADMIN) {
+        profile = await prisma.admin.update({
+            where: {
+                email: userData.email
+            },
+            data: payload
+        })
+    }
+    if (userData.role === userRole.DOCTOR) {
+        profile = await prisma.doctor.update({
+            where: {
+                email: userData.email
+            },
+            data: payload
+        })
+    }
+    if (userData.role === userRole.PATIENT) {
+        profile = await prisma.patient.update({
+            where: {
+                email: userData.email
+            },
+            data: payload
+        })
+    }
+
+    if (!profile) {
+        throw new ApiError(status.NOT_FOUND, "profile not found.")
+    }
+
+    return profile
+}
+
 export const userService = {
     createAdmin,
     createDoctor,
     createPatient,
     getAllUsers,
-    changeProfileStatus
+    changeProfileStatus,
+    getMyProfile,
+    updateProfile
 }

@@ -11,13 +11,13 @@ const router = Router()
 router.post('/create-admin',
     auth(userRole.ADMIN, userRole.SUPER_ADMIN),
     upload.single("file"),
-    (req: Request, res: Response, next: NextFunction) => {        
-        req.body = createAdmin.parse(JSON.parse(req.body.data))       
+    (req: Request, res: Response, next: NextFunction) => {
+        req.body = createAdmin.parse(JSON.parse(req.body.data))
         return userController.createAdmin(req, res, next)
     }
 )
 
-router.post('/create-doctor', 
+router.post('/create-doctor',
     auth(userRole.SUPER_ADMIN, userRole.ADMIN),
     upload.single("file"),
     (req: Request, res: Response, next: NextFunction) => {
@@ -26,7 +26,7 @@ router.post('/create-doctor',
     }
 )
 
-router.post('/create-patient', 
+router.post('/create-patient',
     upload.single("file"),
     (req: Request, res: Response, next: NextFunction) => {
         req.body = createPatient.parse(JSON.parse(req.body.data))
@@ -36,13 +36,29 @@ router.post('/create-patient',
 
 router.get('/',
     auth(userRole.ADMIN, userRole.SUPER_ADMIN),
-     userController.getAllUsers)
+    userController.getAllUsers)
 
 router.patch(
-        '/:id/status',
-        auth(userRole.SUPER_ADMIN, userRole.ADMIN),
-        validateRequest(updateStatus),
-        userController.changeProfileStatus
-    );
+    '/:id/status',
+    auth(userRole.SUPER_ADMIN, userRole.ADMIN),
+    validateRequest(updateStatus),
+    userController.changeProfileStatus
+);
+
+router.get('/me',
+    auth(userRole.ADMIN, userRole.DOCTOR, userRole.PATIENT, userRole.SUPER_ADMIN),
+    userController.getMyProfile
+)
+
+router.patch('/update-my-profile',
+    auth(userRole.ADMIN, userRole.DOCTOR, userRole.PATIENT, userRole.SUPER_ADMIN),
+    upload.single("file"),
+    (req: Request, res: Response, next: NextFunction) => {
+        req.body = JSON.parse(req.body.data)
+        return userController.updateProfile(req, res, next)
+    }
+)
+
+
 
 export const userRouter = router
