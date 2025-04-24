@@ -3,7 +3,8 @@ import { userController } from "./user.controller";
 import { userRole } from "@prisma/client";
 import { auth } from "../../middleWare/Auth";
 import { upload } from "../../shared/fileUpload";
-import { createAdmin, createDoctor, createPatient } from "./user.validation";
+import { createAdmin, createDoctor, createPatient, updateStatus } from "./user.validation";
+import validateRequest from "../../middleWare/validateRequest";
 
 const router = Router()
 
@@ -33,6 +34,15 @@ router.post('/create-patient',
     }
 )
 
-router.get('/', userController.getAllUsers)
+router.get('/',
+    auth(userRole.ADMIN, userRole.SUPER_ADMIN),
+     userController.getAllUsers)
+
+router.patch(
+        '/:id/status',
+        auth(userRole.SUPER_ADMIN, userRole.ADMIN),
+        validateRequest(updateStatus),
+        userController.changeProfileStatus
+    );
 
 export const userRouter = router

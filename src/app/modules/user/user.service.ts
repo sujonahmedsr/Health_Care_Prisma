@@ -6,6 +6,7 @@ import status from "http-status"
 import { Request } from "express"
 import { object } from "zod"
 import { calculatePagination, IOptions } from "../../shared/paginationHelper"
+import { userFilterableFields, userSearchAbleFields } from "./user.constant"
 
 const prisma = new PrismaClient()
 
@@ -159,7 +160,7 @@ const getAllUsers = async (query: any, options: IOptions) => {
 
     if(searchTerm){
         andConditions.push({
-            OR: ["email"].map(field => ({
+            OR: userSearchAbleFields.map(field => ({
                 [field]: {
                     contains: searchTerm,
                     mode: "insensitive"
@@ -188,6 +189,18 @@ const getAllUsers = async (query: any, options: IOptions) => {
             [sortBy]: sortOrder
         } : {
             createdAt: "desc"
+        },
+        select: {
+            id: true,
+            email: true,
+            role: true,
+            needPasswordChange: true,
+            status: true,
+            createdAt: true,
+            updatedAt: true,
+            admin: true,
+            Patient: true,
+            Doctor: true
         }
     })
     const total = await prisma.user.count()
@@ -201,9 +214,31 @@ const getAllUsers = async (query: any, options: IOptions) => {
     };
 }
 
+const changeProfileStatus = async (id: string, status: userRole) => {
+    const userData = await prisma.user.findUniqueOrThrow({
+        where: {
+            id
+        }
+    });
+
+    if(!userData){
+        throw new ApiError(404, "User not found.")
+    }
+
+    const updateUserStatus = await prisma.user.update({
+        where: {
+            id
+        },
+        data: status
+    });
+
+    return updateUserStatus;
+};
+
 export const userService = {
     createAdmin,
     createDoctor,
     createPatient,
-    getAllUsers
+    getAllUsers,
+    changeProfileStatus
 }

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { userService } from "./user.service";
 import catchAsync from "../../utils/catchAsync";
 import pick from "../../shared/pick";
+import { userFilterableFields } from "./user.constant";
 
 const createAdmin = catchAsync(async (req: Request, res: Response) => {
     const result = await userService.createAdmin(req)
@@ -31,7 +32,7 @@ const createPatient = catchAsync(async (req: Request, res: Response) => {
 })
 
 const getAllUsers = catchAsync(async (req: Request, res: Response) => {
-    const query = pick(req.query, ["searchTerm", "email"]) as Record<string, string>;
+    const query = pick(req.query, userFilterableFields) as Record<string, string>;
     const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']) as Record<string, string>;
     const result = await userService.getAllUsers(query, options)
     res.status(200).json({
@@ -42,9 +43,22 @@ const getAllUsers = catchAsync(async (req: Request, res: Response) => {
     })
 })
 
+const changeProfileStatus = catchAsync(async (req: Request, res: Response) => {
+
+    const { id } = req.params;
+    const result = await userService.changeProfileStatus(id, req.body)
+
+    res.status(200).json({
+        success: true,
+        message: "Users profile status changed!",
+        data: result
+    })
+});
+
 export const userController = {
     createAdmin,
     createDoctor,
     createPatient,
-    getAllUsers
+    getAllUsers,
+    changeProfileStatus
 }
